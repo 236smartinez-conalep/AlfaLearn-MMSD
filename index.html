@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="es" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>AlfaLearn - CONALEP</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Fredoka',sans-serif;
+}
+
+body{
+overflow:hidden;
+height:100vh;
+background:
+radial-gradient(circle at top,#1e3a8a,#0f172a 70%);
+color:white;
+position:relative;
+}
+
+/* ESTRELLAS */
+
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background-image:
+radial-gradient(white 1px,transparent 1px);
+background-size:40px 40px;
+opacity:.15;
+animation:stars 20s linear infinite;
+pointer-events:none;
+}
+
+@keyframes stars{
+from{
+transform:translateY(0);
+}
+to{
+transform:translateY(40px);
+}
+}
+
+/* TITULO */
+
+.pixel{
+font-family:'Press Start 2P',cursive;
+}
+
+.glow{
+color:#facc15;
+text-shadow:
+0 0 10px #facc15,
+0 0 20px #facc15,
+0 0 40px #f59e0b;
+animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+50%{
+text-shadow:
+0 0 15px #facc15,
+0 0 35px #facc15,
+0 0 60px #f59e0b;
+}
+}
+
+/* TARJETAS */
+
+.card{
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(12px);
+border:1px solid rgba(255,255,255,.15);
+border-radius:20px;
+transition:.3s;
+}
+
+.card:hover{
+transform:translateY(-6px);
+}
+
+/* BOTONES */
+
+.btn{
+transition:.3s;
+}
+
+.btn:hover{
+transform:scale(1.05);
+}
+
+.btn-play{
+background:
+linear-gradient(
+135deg,
+#facc15,
+#f59e0b
+);
+color:white;
+font-size:1.4rem;
+font-weight:bold;
+border:none;
+border-radius:20px;
+padding:18px 40px;
+box-shadow:
+0 10px 30px rgba(250,204,21,.4);
+cursor:pointer;
+}
+
+/* LOGOS */
+
+.logo-box{
+width:120px;
+height:120px;
+background:white;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:10px;
+box-shadow:
+0 0 20px #38bdf8;
+}
+
+/* ICONOS FLOTANTES */
+
+.float{
+position:absolute;
+font-size:50px;
+opacity:.35;
+animation:float 4s ease-in-out infinite;
+}
+
+.f1{
+top:12%;
+left:8%;
+}
+
+.f2{
+top:15%;
+right:8%;
+}
+
+.f3{
+bottom:20%;
+left:10%;
+}
+
+.f4{
+bottom:22%;
+right:10%;
+}
+
+@keyframes float{
+50%{
+transform:translateY(-15px);
+}
+}
+
+/* PANEL PRINCIPAL */
+
+.home-panel{
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+gap:20px;
+text-align:center;
+padding:20px;
+}
+
+.subtitle{
+font-size:1.3rem;
+opacity:.9;
+}
+
+/* ==========================================
+   NUEVOS ESTILOS: RECUADROS ANIMALISTAS 
+   ========================================== */
+.level-box {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.level-box:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.btn-animal-click {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-radius: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.25rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-animal-click:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+}
+
+.box-easy { border-left: 6px solid #16a34a; }
+.btn-easy-go { background: #16a34a; box-shadow: 0 4px 0 #15803d; }
+
+.box-medium { border-left: 6px solid #3b82f6; }
+.btn-medium-go { background: #3b82f6; box-shadow: 0 4px 0 #2563eb; }
+
+.box-hard { border-left: 6px solid #dc2626; }
+.btn-hard-go { background: #dc2626; box-shadow: 0 4px 0 #b91c1c; }
+
+</style>
+</head>
+
+<body>
+
+<div id="app"></div>
+
+
+<script>
+
+
+        /* =========================================================
+
+        /* =========================================================
+   CONFIGURACIÓN VISUAL Y COLORES
+========================================================= */
+        const config = {
+            title: "AlfaLearn",
+            subtitle: "CONALEP Estado de México",
+            primary:"",
+            secondary: "#4338ca",
+            success: "#16a34a",
+            danger: "#dc2626",
+        };
+
+        /* =========================================================
+  
+  ESTADO DEL JUEGO GLOBAL
+========================================================= */
+        let currentView = "home";
+        let currentLevel = "";
+        let currentGame = "";
+
+        let gameState = {
+            score: 0,
+            round: 0,
+            lives: 3
+        };
+
+        // Control de niveles desbloqueados
+        let playerProgress = {
+            easy: { unlocked: true, completed: false, highscore: 0 },
+            medium: { unlocked: false, completed: false, highscore: 0 },
+            hard: { unlocked: false, completed: false, highscore: 0 }
+        };
+
+        /* =========================================================
+   /* =========================================================
+   ESTRUCTURA DE NIVELES Y MENÚS
+========================================================= */
+        const gamesByLevel = {
+            easy: [
+                { id: 'vowel_catch', name: 'Atrapa Vocales', emoji: '🎯' },
+                { id: 'syllable_match', name: 'Une Sílabas', emoji: '🧩' },
+                { id: 'letter_pop', name: 'Explota Letras', emoji: '💥' }
+            ],
+            medium: [
+                { id: 'word_builder', name: 'Constructor', emoji: '🏗️' },
+                { id: 'spelling_race', name: 'Carrera Ortográfica', emoji: '🏎️' },
+                { id: 'word_snake', name: 'Serpiente', emoji: '🐍' }
+            ],
+            hard: [
+                { id: 'sentence_order', name: 'Ordena Frases', emoji: '📝' },
+                { id: 'grammar_invaders', name: 'Gramática', emoji: '👾' },
+                { id: 'reading_challenge', name: 'Lectura', emoji: '📖' },
+                { id: 'synonym_match', name: 'Sinónimos', emoji: '🔄' },
+                { id: 'antonym_hunt', name: 'Antónimos', emoji: '🎯' },
+                { id: 'text_analysis', name: 'Análisis', emoji: '📊' },
+                { id: 'rhetoric_challenge', name: 'Retórica', emoji: '🎭' },
+                { id: 'debate_simulator', name: 'Debate', emoji: '💬' }
+            ]
+        };
+
+        /* =========================================================
+  /* =========================================================
+   BANCO DE PREGUNTAS: TU CONTENIDO ORIGINAL + FILTRADO DE ALTA DIFICULTAD
+========================================================= */
+        const gameContent = {
+            // --- NIVEL FÁCIL (Morfología y Letras) ---
+            vowel_catch: [
+                // Tus preguntas iniciales intactas
+                { question: '¿La letra "A" es una vocal o una consonante?', options: ['Vocal', 'Consonante'], answer: 'Vocal' },
+                { question: '¿La letra "M" es una vocal o una consonante?', options: ['Vocal', 'Consonante'], answer: 'Consonante' },
+                { question: '¿La letra "O" es una vocal o una consonante?', options: ['Vocal', 'Consonante'], answer: 'Vocal' },
+                // ➕ ALTA DIFICULTAD: Trampa de vocales fuertes/débiles y diptongos
+                { question: '¿Cuál de las siguientes opciones contiene únicamente VOCALES DÉBILES (cerradas)?', options: ['I, U', 'A, E, O', 'A, I'], answer: 'I, U' },
+                { question: 'En la palabra "HÉROE", ¿qué tipo de encuentro vocálico ocurre entre la E y la O?', options: ['Hiato (se separan)', 'Diptongo (se unen)', 'Triptongo'], answer: 'Hiato (se separan)' }
+            ],
+
+            syllable_match: [
+                // Tus preguntas iniciales intactas
+                { question: 'Une las sílabas para formar la palabra:', text: 'CA + SA', options: ['CASA', 'MESA', 'CAMA'], answer: 'CASA' },
+                { question: 'Une las sílabas para formar la palabra:', text: 'LI + BRO', options: ['LIBRO', 'LIBRA', 'LIMA'], answer: 'LIBRO' },
+                { question: 'Une las sílabas para formar la palabra:', text: 'PLU + MA', options: ['PUMA', 'PLUMA', 'PALMA'], answer: 'PLUMA' },
+                // ➕ ALTA DIFICULTAD: Conteo silábico complejo
+                { question: '¿Cuál es la separación silábica correcta y exacta de la palabra "COMPREHENSIÓN"?', options: ['Com - pre - hen - sión', 'Com - pren - sión', 'Co - mpre - hen - sión'], answer: 'Com - pre - hen - sión' },
+                { question: '¿Cuántas sílabas tiene la palabra "ANTICONSTITUCIONALMENTE"?', options: ['10 sílabas', '9 sílabas', '11 sílabas'], answer: '10 sílabas' }
+            ],
+
+            letter_pop: [
+                // Tus preguntas iniciales intactas
+                { question: '¿Con qué letra empieza el objeto donde lees tus lecciones?', text: '📘 _ibro', options: ['L', 'B', 'P'], answer: 'L' },
+                { question: '¿Qué vocal falta para completar la palabra?', text: 'Estud__ante', options: ['i', 'e', 'o'], answer: 'i' },
+                { question: 'Selecciona la consonante que completa la palabra:', text: 'A_prender', options: ['p', 'b', 'm'], answer: 'p' },
+                // ➕ ALTA DIFICULTAD: Uso complejo de grafías dudosas (CC / SC)
+                { question: '¿Qué combinación de letras falta para completar correctamente el término académico?', text: 'Reda__ión', options: ['cc', 'c', 'sc'], answer: 'cc' },
+                { question: '¿Qué consonantes completan la palabra correctamente de acuerdo a su raíz gramatical?', text: 'A_di_ión (acción de sumar)', options: ['d - c', 'd - s', 't - c'], answer: 'd - c' }
+            ],
+
+            // --- NIVEL MEDIO (Léxico y Ortografía) ---
+            word_builder: [
+                // Tus preguntas iniciales intactas
+                { question: 'Ordena las letras desordenadas para formar una palabra real:', text: 'SACA', options: ['CASA', 'SOPA', 'MESA'], answer: 'CASA' },
+                { question: 'Ordena las letras desordenadas para formar un valor importante:', text: 'TEORPSE', options: ['RESPETO', 'REPORTE', 'ROPERO'], answer: 'RESPETO' },
+                { question: 'Ordena las letras desordenadas:', text: 'EALSUEC', options: ['ESCUELA', 'ESCALA', 'ESCUADRA'], answer: 'ESCUELA' },
+                // ➕ ALTA DIFICULTAD: Anagramas extensos de vocabulario técnico
+                { question: 'Ordena las letras para construir un concepto clave de la alfabetización y el habla:', text: 'AILCNUCOCOIM', options: ['COMUNICACIÓN', 'COMUNIDAD', 'ACUMULACIÓN'], answer: 'COMUNICACIÓN' },
+                { question: 'Ordena las letras para formar la palabra técnica correcta:', text: 'RAOFAOTGRI', options: ['ORTOGRAFÍA', 'GRAFOLOGÍA', 'FOTOGRAFÍA'], answer: 'ORTOGRAFÍA' }
+            ],
+
+            spelling_race: [
+                // Tus preguntas iniciales (Se corrigieron las mayúsculas/minúsculas para que coincidan con answer)
+                { question: '¿Cuál palabra tiene la ortografía correcta?', options: ['Haber', 'Aver'], answer: 'Haber' },
+                { question: '¿Cuál palabra está escrita correctamente con "C", "S" o "Z"?', options: ['Hacer', 'Aser', 'Hazer'], answer: 'Hacer' },
+                { question: '¿Cuál opción respeta las reglas de la "G" y la "J"?', options: ['Gente', 'Jente'], answer: 'Gente' },
+                // ➕ ALTA DIFICULTAD: Homófonos complejos (B/V, H/Sin H)
+                { question: '¿Cuál es la oración redactada con la ortografía impecable?', options: ['Él tubo que deshacer el error.', 'Él tuvo que deshacer el error.', 'Él tuvo que desacer el error.'], answer: 'Él tuvo que deshacer el error.' },
+                { question: 'Selecciona la opción que utiliza correctamente las reglas de acentuación diacrítica:', options: ['Sé que tú necesitas más tiempo para el examen.', 'Se que tu necesitas mas tiempo para el examen.', 'Sé que tu necesitas más tiempo para el examen.'], answer: 'Sé que tú necesitas más tiempo para el examen.' }
+            ],
+
+            word_snake: [
+                // Tus preguntas iniciales intactas
+                { question: '¿Qué palabra completa correctamente el espacio?', text: 'El alumno ___ un texto en su libreta.', options: ['escribe', 'escriben', 'escribieron'], answer: 'escribe' },
+                { question: 'Elige la palabra que completa la secuencia lógica:', text: 'Leer, comprender, ___', options: ['aprender', 'saltar', 'correr'], answer: 'aprender' },
+                { question: '¿Cuál palabra se asocia directamente con la alfabetización?', options: ['Educación', 'Automóvil', 'Construcción'], answer: 'Educación' },
+                // ➕ ALTA DIFICULTAD: Conectores discursivos complejos
+                { question: '¿Qué conector lógico subordinante completa correctamente la cohesión de la frase?', text: 'Estudió con mucha disciplina; __________, no logró obtener el puntaje máximo.', options: ['no obstante', 'por lo tanto', 'además'], answer: 'no obstante' },
+                { question: 'Completa la cadena con el término preciso de precisión léxica:', text: 'El director decidió ______ el contrato debido a las faltas repetidas del empleado.', options: ['rescindir', 'romper', 'hacer a un lado'], answer: 'rescindir' }
+            ],
+
+            // --- NIVEL DIFÍCIL (Sintaxis y Comprensión) ---
+            sentence_order: [
+                // Tus preguntas iniciales intactas
+                { question: 'Selecciona la opción que tiene una estructura sintáctica lógica y coherente (Sujeto + Verbo + Predicado):', options: ['Yo voy a la escuela en la mañana', 'Escuela voy yo mañana la en'], answer: 'Yo voy a la escuela en la mañana' },
+                { question: '¿Cuál oración está correctamente ordenada?', options: ['El estudiante lee un artículo científico', 'Artículo un lee científico el estudiante'], answer: 'El estudiante lee un artículo científico' },
+                // ➕ ALTA DIFICULTAD: Hipérbaton (Desorden literario/formal) y oraciones compuestas
+                { question: '¿Cuál de las siguientes estructuras complejas mantiene una sintaxis correcta a pesar de alterar el orden común?', options: ['Por el camino del éxito avanzan con paso firme los alumnos.', 'Avanzan paso firme los alumnos por el camino éxito con.', 'Los alumnos con paso firme avanzan camino del éxito por.'], answer: 'Por el camino del éxito avanzan con paso firme los alumnos.' },
+                { question: 'Selecciona la opción que no incurre en el vicio sintáctico de la "Anfibología" (doble sentido o confusión):', options: ['El maestro vio al alumno caminando por su propia calle.', 'Caminando por la calle, el maestro pudo ver al alumno.', 'El maestro vio al alumno por la calle de él caminando.'], answer: 'Caminando por la calle, el maestro pudo ver al alumno.' }
+            ],
+
+            grammar_invaders: [
+                // Tus preguntas iniciales intactas
+                { question: 'Determina si la oración respeta la concordancia de género y número:', text: 'La gato duerme en el sillón.', options: ['Correcta', 'Incorrecta (Debe ser "El gato" o "La gata")'], answer: 'Incorrecta (Debe ser "El gato" o "La gata")' },
+                { question: '¿La siguiente oración tiene concordancia?', text: 'Los alumnos estudian para su examen.', options: ['Correcta', 'Incorrecta'], answer: 'Correcta' },
+                { question: '¿Cuál es el error en la siguiente frase?', text: 'Ellos come manzanas.', options: ['Falta concordancia de número en el verbo', 'Está bien escrita'], answer: 'Falta concordancia de número en el verbo' },
+                // ➕ ALTA DIFICULTAD: Silepsis, concordancia colectiva y laísmo/leísmo
+                { question: '¿Cuál de las siguientes opciones presenta un error grave de concordancia con sujetos colectivos?', options: ['La mayoría de los estudiantes aprobaron el examen.', 'El grupo de alumnos decidieron marchar temprano.', 'Un centenar de personas asistió al evento.'], answer: 'El grupo de alumnos decidieron marchar temprano.' },
+                { question: 'Identifica la oración que utiliza de forma impecable los pronombres de objeto directo e indirecto sin caer en "leísmo":', options: ['A Juan le premiaron en el concurso de redacción.', 'A Juan lo premiaron en el concurso de redacción.', 'A Juan el concurso le premió.'], answer: 'A Juan lo premiaron en el concurso de redacción.' }
+            ],
+
+            reading_challenge: [
+                // Tus preguntas iniciales intactas
+                { 
+                    question: '¿Cuál es la idea principal del siguiente fragmento?', 
+                    text: 'La lectura diaria expande el vocabulario, estimula la imaginación y mejora la capacidad de redacción de los jóvenes.', 
+                    options: ['Los beneficios de la lectura en el desarrollo lingüístico', 'Que a los jóvenes les gusta leer historias', 'Cómo se fabrican los libros modernos'], 
+                    answer: 'Los beneficios de la lectura en el desarrollo lingüístico' 
+                },
+                { 
+                    question: 'De acuerdo al texto, ¿cuál es la intención del autor?', 
+                    text: '¡Cómpralo ya! Solo quedan dos unidades en oferta.', 
+                    options: ['Persuadir', 'Informar', 'Entretener'], 
+                    answer: 'Persuadir' 
+                },
+                // ➕ ALTA DIFICULTAD: Inferencia lógica, falacias y premisas complejas
+                { 
+                    question: '¿Qué conclusión o inferencia lógica se extrae directamente del siguiente fragmento?', 
+                    text: 'Ningún estudiante analfabeto puede interpretar códigos de programación complejos. Carlos es capaz de diseñar arquitecturas de software avanzadas para redes.', 
+                    options: ['Carlos cuenta con un nivel de alfabetización y lectoescritura óptimo.', 'Carlos aprendió a programar sin saber leer.', 'Cualquier estudiante alfabetizado sabe programar software.'], 
+                    answer: 'Carlos cuenta con un nivel de alfabetización y lectoescritura óptimo.' 
+                },
+                { 
+                    question: '¿Qué tipo de vicio argumentativo (falacia) se comete en el siguiente texto?', 
+                    text: 'El profesor dice que debemos mejorar nuestra ortografía para el ámbito profesional, pero no hay que hacerle caso porque ayer lo vi cometer un error al escribir en el pizarrón.', 
+                    options: ['Falacia Ad Hominem (Ataque a la persona)', 'Falacia Ad Baculum (Apelación a la fuerza)', 'Falacia De Generalización Apresurada'], 
+                    answer: 'Falacia Ad Hominem (Ataque a la persona)' 
+                }
+            ]
+        };
+        /* =========================================================
+   VISTA: HOME
+========================================================= */
+        function renderHome() {
+            currentView = "home";
+            document.getElementById("app").innerHTML = `
+            <div class="home-panel">
+                <div class="float f1">🧠</div>
+                <div class="float f2">🎓</div>
+                <div class="float f3">📚</div>
+                <div class="float f4">💡</div>
+                <div class="flex gap-4 mb-6">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Conalep-logo.png" width="80">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Emblema_del_Gobierno_del_Estado_de_M%C3%A9xico_per%C3%ADodo_2023-2029.png" width="220">
+                </div>
+                <h1 class="pixel glow">AlfaLearn</h1>
+                <p class="subtitle">Aprende jugando</p>
+                <p>CONALEP Estado de México</p>
+                <button class="btn-play" onclick="renderLevels()">🎮 JUGAR</button>
+            </div>
+            `;
+        }
+        /* =========================================================
+   VISTA: SELECCIÓN NIVELES
+========================================================= */
+
+      function renderLevels() {
+            currentView = "levels";
+
+            document.getElementById("app").innerHTML = `
+            <div class="min-h-screen p-6 flex flex-col items-center overflow-y-auto">
+                
+                <button onclick="renderHome()" class="mb-8 self-start text-white/70 hover:text-white transition-colors">
+                    ← Volver al Menu Principal
+                </button>
+
+                <h1 class="pixel glow text-3xl mb-10 text-center">Niveles</h1>
+
+                <div class="flex flex-col gap-6 w-full max-w-md mx-auto">
+                    
+                    <!-- NIVEL 1: FÁCIL -->
+                    <div class="level-box box-easy flex flex-col gap-4 ${playerProgress.easy.unlocked ? '' : 'opacity-40'}">
+                        <div class="flex justify-between items-center px-2">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-green-400">NIVEL INICIAL</span>
+                                <h2 class="text-xl font-bold text-white">Jugar Facil 🐥</h2>
+                            </div>
+                            <span class="text-sm bg-black/40 px-3 py-1 rounded-full text-green-400 font-bold">
+                                ${playerProgress.easy.completed ? '🏆 ¡SUPERADO!' : '⭐ Record: ' + playerProgress.easy.highscore}
+                            </span>
+                        </div>
+                        <button onclick="renderGames('easy')" class="btn-animal-click btn-easy-go">
+                            <span>🎮 INICIAR NIVEL</span>
+                            <span>➔</span>
+                        </button>
+                    </div>
+
+                    <!-- NIVEL 2: MEDIO -->
+                    <div class="level-box box-medium flex flex-col gap-4 ${playerProgress.medium.unlocked ? '' : 'opacity-50 select-none'}">
+                        <div class="flex justify-between items-center px-2">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-blue-400">NIVEL MEDIO</span>
+                                <h2 class="text-xl font-bold text-white">Jugar Medio 🐺</h2>
+                            </div>
+                            <span class="text-sm bg-black/40 px-3 py-1 rounded-full text-blue-400 font-bold">
+                                ${playerProgress.medium.unlocked ? (playerProgress.medium.completed ? '🏆 ¡SUPERADO!' : '⭐ Record: ' + playerProgress.medium.highscore) : '🔒 BLOQUEADO'}
+                            </span>
+                        </div>
+                        ${playerProgress.medium.unlocked 
+                            ? `<button onclick="renderGames('medium')" class="btn-animal-click btn-medium-go">
+                                 <span>🎮 INICIAR NIVEL</span>
+                                 <span>➔</span>
+                               </button>`
+                            : `<button class="btn-animal-click bg-gray-700 cursor-not-allowed text-gray-400" disabled>
+                                 <span>Necesitas pasar el Nivel Inicial</span>
+                                 <span>🔒</span>
+                               </button>`
+                        }
+                    </div>
+
+                    <!-- NIVEL 3: DIFÍCIL -->
+                    <div class="level-box box-hard flex flex-col gap-4 ${playerProgress.hard.unlocked ? '' : 'opacity-50 select-none'}">
+                        <div class="flex justify-between items-center px-2">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-red-400">Nivel Dificil</span>
+                                <h2 class="text-xl font-bold text-white">Jugar Dificil 🦁</h2>
+                            </div>
+                            <span class="text-sm bg-black/40 px-3 py-1 rounded-full text-red-400 font-bold">
+                                ${playerProgress.hard.unlocked ? (playerProgress.hard.completed ? '🏆 ¡SUPERADO!' : '⭐ Record: ' + playerProgress.hard.highscore) : '🔒 BLOQUEADO'}
+                            </span>
+                        </div>
+                        ${playerProgress.hard.unlocked 
+                            ? `<button onclick="renderGames('hard')" class="btn-animal-click btn-hard-go">
+                                 <span>🎮 DESAFÍO FINAL</span>
+                                 <span>➔</span>
+                               </button>`
+                            : `<button class="btn-animal-click bg-gray-700 cursor-not-allowed text-gray-400" disabled>
+                                 <span>Necesitas pasar el Nivel Medio</span>
+                                 <span>🔒</span>
+                               </button>`
+                        }
+
+                    </div>
+
+                </div>
+            </div>
+            `;
+        }
+
+        /* =========================================================
+  VISTA: SELECCIÓN JUEGOS
+========================================================= */
+        function renderGames(level) {
+            currentLevel = level;
+            const games = gamesByLevel[level];
+
+            document.getElementById("app").innerHTML = `
+            <div class="min-h-screen p-6">
+                <button onclick="renderLevels()" class="mb-6 text-white/70 hover:text-white transition-colors">
+                    ← Volver a Niveles
+                </button>
+                <h1 class="text-3xl font-bold mb-8 text-center uppercase tracking-wider">Juegos Disponibles</h1>
+                <div class="grid gap-4 max-w-lg mx-auto">
+                    ${games.map(game => `
+                        <button onclick="startGame('${game.id}')" class="card p-5 rounded-3xl text-left flex items-center" style="background:${config.secondary}">
+                            <span class="text-3xl">${game.emoji}</span>
+                            <span class="text-xl ml-4 font-medium">${game.name}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+            `;
+        }
+
+        /* =========================================================
+   FLUJO: INICIAR PARTIDA
+========================================================= */
+        function startGame(game) {
+            currentGame = game;
+            // CORREGIDO: Removido el 'let' para usar el estado global correctamente
+            gameState.score = 0;
+            gameState.round = 0;
+            gameState.lives = 3;
+
+            renderSimpleGame();
+        }
+
+        /* =========================================================
+  VISTA: ESTRUCTURA JUEGO EN CURSO
+========================================================= */
+        function renderSimpleGame() {
+            const data = gameContent[currentGame];
+
+            if (gameState.round >= data.length) {
+                finishGame();
+                return;
+            }
+
+            const item = data[gameState.round];
+
+            document.getElementById("app").innerHTML = `
+            <div class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+                <h1 class="text-3xl font-bold mb-4 uppercase tracking-wide">
+                    🎮 ${currentGame.replaceAll('_', ' ')}
+                </h1>
+                <div class="flex gap-8 mb-6 text-xl bg-black/20 px-6 py-2 rounded-full border border-white/5">
+                    <div class="text-yellow-400 font-bold">⭐ Puntos: ${gameState.score}</div>
+                    <div class="text-red-400 font-bold">❤️ Vidas: ${'❤️'.repeat(gameState.lives)}</div>
+                </div>
+                <div class="w-full max-w-xl rounded-3xl p-8 shadow-2xl border border-white/10" style="background:${config.secondary}">
+                    ${renderGameContent(item)}
+                </div>
+                <div class="mt-6 text-sm text-white/40">Pregunta ${gameState.round + 1} de ${data.length}</div>
+            </div>
+            `;
+        }
+
+        /* =========================================================
+   RENDER DEL CONTENIDO DINÁMICO
+========================================================= */
+        function renderGameContent(item) {
+            return `
+            <div>
+                <h2 class="text-2xl font-bold mb-6">${item.question}</h2>
+                ${item.text ? `<div class="bg-black/30 p-4 rounded-2xl mb-6 text-xl font-mono">${item.text}</div>` : ''}
+                <div id="options-container" class="flex flex-col gap-4 p-2 bg-black/10 rounded-2xl">
+                    ${item.options.map(option => `
+                        <button onclick="checkAnswer(this, '${option.replace(/'/g, "\\'")}', '${item.answer.replace(/'/g, "\\'")}')" 
+                                class="btn bg-indigo-700 hover:bg-indigo-600 p-4 rounded-2xl text-lg w-full font-medium text-white text-left px-6 shadow-md">
+                            ${option}
+                        </button>
+                    `).join('')}
+                </div>
+                <div id="feedback-box" class="mt-6 hidden p-4 rounded-2xl text-xl font-bold transition-all duration-300"></div>
+            </div>
+            `;
+        }
+        /* =========================================================
+   PROCESAMIENTO DE RESPUESTAS
+========================================================= */
+        function checkAnswer(buttonElement, selected, correct) {
+            const buttons = document.querySelectorAll("#options-container button");
+            buttons.forEach(btn => btn.disabled = true);
+
+            const feedbackBox = document.getElementById("feedback-box");
+            feedbackBox.classList.remove("hidden");
+
+            if (selected === correct) {
+                buttonElement.style.backgroundColor = config.success;
+                feedbackBox.style.backgroundColor = "rgba(22, 163, 74, 0.2)";
+                feedbackBox.style.border = `2px solid ${config.success}`;
+                feedbackBox.style.color = "#4ade80";
+                feedbackBox.innerHTML = "✨ ¡Correcto! +10 puntos";
+                gameState.score += 10;
+            } else {
+                buttonElement.style.backgroundColor = config.danger;
+                buttons.forEach(btn => {
+                    if (btn.innerText.trim() === correct) {
+                        btn.style.backgroundColor = config.success;
+                    }
+                });
+                feedbackBox.style.backgroundColor = "rgba(220, 38, 38, 0.2)";
+                feedbackBox.style.border = `2px solid ${config.danger}`;
+                feedbackBox.style.color = "#f87171";
+                feedbackBox.innerHTML = "❌ ¡Incorrecto! Perdiste una vida";
+                gameState.lives--;
+            }
+
+            gameState.round++;
+
+            setTimeout(() => {
+                if (gameState.lives <= 0 || gameState.round >= gameContent[currentGame].length) {
+                    finishGame();
+                } else {
+                    renderSimpleGame();
+                }
+            }, 1200);
+        }
+        /* =========================================================
+   VISTA: PANTALLA FINAL (CORREGIDA Y ÚNICA)
+========================================================= */
+        function finishGame() {
+            // Guardar récord del nivel
+            if (gameState.score > playerProgress[currentLevel].highscore) {
+                playerProgress[currentLevel].highscore = gameState.score;
+            }
+
+            // Validar victoria para desbloqueos
+            let winMessage = "Juego Terminado";
+            if (gameState.lives > 0) {
+                playerProgress[currentLevel].completed = true;
+                winMessage = "🎉 ¡NIVEL COMPLETADO! 🎉";
+                
+                if (currentLevel === 'easy') {
+                    playerProgress.medium.unlocked = true;
+                } else if (currentLevel === 'medium') {
+                    playerProgress.hard.unlocked = true;
+                }
+            }
+
+            document.getElementById("app").innerHTML = `
+            <div class="min-h-screen flex flex-col items-center justify-center text-center p-6">
+                <h1 class="pixel glow text-3xl mb-6">${winMessage}</h1>
+                <div class="text-4xl font-bold mb-4">⭐ ${gameState.score} puntos</div>
+                <p class="text-lg mb-8 text-white/70 max-w-sm">
+                    ${gameState.lives > 0 ? '¡Pasaste el filtro! Tu progreso ha sido guardado exitosamente en el sistema.' : 'Te quedaste sin respuestas. ¡Estudia un poco más y vuelve a intentar!'}
+                </p>
+                <div class="flex gap-4">
+                    <button onclick="startGame(currentGame)" class="btn bg-green-600 hover:bg-green-500 px-6 py-3 rounded-2xl font-bold cursor-pointer text-white">
+                        🔄 Reintentar
+                    </button>
+                    <button onclick="renderLevels()" class="btn bg-indigo-700 hover:bg-indigo-600 px-6 py-3 rounded-2xl font-bold cursor-pointer text-white">
+                        🗺️ Ver Niveles
+                    </button>
+                </div>
+            </div>
+            `;
+        }
+        
+        /* =========================================================
+   ARRANQUE DE LA APLICACIÓN
+========================================================= */
+        renderHome();
+
+    </script>
+
+</body>
+</html>
