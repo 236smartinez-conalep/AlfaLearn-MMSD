@@ -440,14 +440,35 @@ if (savedProgress) {
                 { question: 'Selecciona la opción que no incurre en el vicio sintáctico de la "Anfibología" (doble sentido o confusión):', options: ['El maestro vio al alumno caminando por su propia calle.', 'Caminando por la calle, el maestro pudo ver al alumno.', 'El maestro vio al alumno por la calle de él caminando.'], answer: 'Caminando por la calle, el maestro pudo ver al alumno.' }
             ],
 
-            grammar_invaders: [
-                // Tus preguntas iniciales intactas
-                { question: 'Determina si la oración respeta la concordancia de género y número:', text: 'La gato duerme en el sillón.', options: ['Correcta', 'Incorrecta (Debe ser "El gato" o "La gata")'], answer: 'Incorrecta (Debe ser "El gato" o "La gata")' },
-                { question: '¿La siguiente oración tiene concordancia?', text: 'Los alumnos estudian para su examen.', options: ['Correcta', 'Incorrecta'], answer: 'Correcta' },
-                { question: '¿Cuál es el error en la siguiente frase?', text: 'Ellos come manzanas.', options: ['Falta concordancia de número en el verbo', 'Está bien escrita'], answer: 'Falta concordancia de número en el verbo' },
-                // ➕ ALTA DIFICULTAD: Silepsis, concordancia colectiva y laísmo/leísmo
-                { question: '¿Cuál de las siguientes opciones presenta un error grave de concordancia con sujetos colectivos?', options: ['La mayoría de los estudiantes aprobaron el examen.', 'El grupo de alumnos decidieron marchar temprano.', 'Un centenar de personas asistió al evento.'], answer: 'El grupo de alumnos decidieron marchar temprano.' },
-                { question: 'Identifica la oración que utiliza de forma impecable los pronombres de objeto directo e indirecto sin caer en "leísmo":', options: ['A Juan le premiaron en el concurso de redacción.', 'A Juan lo premiaron en el concurso de redacción.', 'A Juan el concurso le premió.'], answer: 'A Juan lo premiaron en el concurso de redacción.' }
+           grammar_invaders: [
+                { 
+                    question: 'Determina si la oración respeta la concordancia de género y número:', 
+                    text: 'La gato duerme en el sillón.', 
+                    options: ['Correcta', 'Incorrecta (Debe ser El gato o La gata)'], 
+                    answer: 'Incorrecta (Debe ser El gato o La gata)' 
+                },
+                { 
+                    question: '¿La siguiente oración tiene concordancia?', 
+                    text: 'Los alumnos estudian para su examen.', 
+                    options: ['Correcta', 'Incorrecta'], 
+                    answer: 'Correcta' 
+                },
+                { 
+                    question: '¿Cuál es el error en la siguiente frase?', 
+                    text: 'Ellos come manzanas.', 
+                    options: ['Falta concordancia de número en el verbo', 'Está bien escrita'], 
+                    answer: 'Falta concordancia de número en el verbo' 
+                },
+                { 
+                    question: '¿Cuál de las siguientes opciones presenta un error grave de concordancia con sujetos colectivos?', 
+                    options: ['La mayoría de los estudiantes aprobaron el examen.', 'El grupo de alumnos decidieron marchar temprano.', 'Un centenar de personas asistió al evento.'], 
+                    answer: 'El grupo de alumnos decidieron marchar temprano.' 
+                },
+                { 
+                    question: 'Identifica la oración que utiliza de forma impecable los pronombres de objeto directo e indirecto sin caer en leísmo:', 
+                    options: ['A Juan le premiaron en el concurso de redacción.', 'A Juan lo premiaron en el concurso de redacción.', 'A Juan el concurso le premió.'], 
+                    answer: 'A Juan lo premiaron en el concurso de redacción.' 
+                }
             ],
 
             reading_challenge: [
