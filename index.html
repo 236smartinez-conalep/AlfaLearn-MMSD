@@ -231,6 +231,25 @@ opacity:.9;
 
 .box-hard { border-left: 6px solid #dc2626; }
 .btn-hard-go { background: #dc2626; box-shadow: 0 4px 0 #b91c1c; }
+.xp-container{
+width:260px;
+height:20px;
+background:rgba(255,255,255,.1);
+border-radius:20px;
+overflow:hidden;
+border:2px solid rgba(255,255,255,.15);
+}
+
+.xp-bar{
+height:100%;
+background:
+linear-gradient(
+90deg,
+#06b6d4,
+#3b82f6
+);
+transition:width .4s;
+}
 
 </style>
 </head>
@@ -256,27 +275,66 @@ opacity:.9;
             success: "#16a34a",
             danger: "#dc2626",
         };
-
-        /* =========================================================
   
-  ESTADO DEL JUEGO GLOBAL
+
+/* =========================================================
+   ESTADO DEL JUEGO
 ========================================================= */
-        let currentView = "home";
-        let currentLevel = "";
-        let currentGame = "";
 
-        let gameState = {
-            score: 0,
-            round: 0,
-            lives: 3
-        };
+let currentView = "home";
+let currentLevel = "";
+let currentGame = "";
 
-        // Control de niveles desbloqueados
-        let playerProgress = {
-            easy: { unlocked: true, completed: false, highscore: 0 },
-            medium: { unlocked: false, completed: false, highscore: 0 },
-            hard: { unlocked: false, completed: false, highscore: 0 }
-        };
+let gameState = {
+    score: 0,
+    round: 0,
+    lives: 3
+};
+
+
+/* =========================================================
+   PROGRESO DEL JUGADOR
+========================================================= */
+
+let playerProgress = {
+
+    
+
+    easy: {
+        unlocked: true,
+        completed: false,
+        highscore: 0
+    },
+
+    medium: {
+        unlocked: false,
+        completed: false,
+        highscore: 0
+    },
+
+    hard: {
+        unlocked: false,
+        completed: false,
+        highscore: 0
+    }
+};
+
+let player = {
+    name:"Jugador",
+    xp:0,
+    level:1
+};
+
+
+
+/* =========================================================
+   CARGAR PROGRESO GUARDADO
+========================================================= */
+
+const savedProgress = localStorage.getItem("progress");
+if (savedProgress) {
+    playerProgress = JSON.parse(savedProgress);
+}
 
         /* =========================================================
    /* =========================================================
@@ -439,7 +497,27 @@ opacity:.9;
                 <h1 class="pixel glow">AlfaLearn</h1>
                 <p class="subtitle">Aprende jugando</p>
                 <p>CONALEP Estado de México</p>
+                <div class="text-cyan-300 font-bold">
+👤 ${player.name} | Nivel ${player.level}
+</div>
+
+<div class="xp-container">
+   <div 
+      class="xp-bar"
+      style="width:${player.xp}%"
+   ></div>
+</div>
+
+<div class="text-sm text-white/70">
+XP: ${player.xp}/100
+</div>
                 <button class="btn-play" onclick="renderLevels()">🎮 JUGAR</button>
+                <button
+onclick="resetProgress()"
+class="mt-4 bg-red-600 px-4 py-2 rounded-xl"
+>
+🗑️ Reiniciar progreso
+</button>
             </div>
             `;
         }
@@ -588,7 +666,7 @@ opacity:.9;
                 </h1>
                 <div class="flex gap-8 mb-6 text-xl bg-black/20 px-6 py-2 rounded-full border border-white/5">
                     <div class="text-yellow-400 font-bold">⭐ Puntos: ${gameState.score}</div>
-                    <div class="text-red-400 font-bold">❤️ Vidas: ${'❤️'.repeat(gameState.lives)}</div>
+                    <div class="text-red-400 font-bold">3 Vidas: ${'❤️'.repeat(gameState.lives)}</div>
                 </div>
                 <div class="w-full max-w-xl rounded-3xl p-8 shadow-2xl border border-white/10" style="background:${config.secondary}">
                     ${renderGameContent(item)}
@@ -635,6 +713,14 @@ opacity:.9;
                 feedbackBox.style.color = "#4ade80";
                 feedbackBox.innerHTML = "✨ ¡Correcto! +10 puntos";
                 gameState.score += 10;
+                player.xp += 10;
+                if(player.xp >= 100){
+                    player.level++;
+                    player.xp = 0;
+                }
+   
+   
+
             } else {
                 buttonElement.style.backgroundColor = config.danger;
                 buttons.forEach(btn => {
@@ -663,47 +749,153 @@ opacity:.9;
    VISTA: PANTALLA FINAL (CORREGIDA Y ÚNICA)
 ========================================================= */
         function finishGame() {
-            // Guardar récord del nivel
-            if (gameState.score > playerProgress[currentLevel].highscore) {
-                playerProgress[currentLevel].highscore = gameState.score;
+
+    // Guardar récord
+    if (gameState.score > playerProgress[currentLevel].highscore) {
+
+        playerProgress[currentLevel].highscore =
+        gameState.score;
+
+    }
+
+    // Desbloquear niveles
+    if (currentLevel === "easy" && gameState.score >= 30) {
+
+        playerProgress.easy.completed = true;
+        playerProgress.medium.unlocked = true;
+
+    }
+
+    if (currentLevel === "medium" && gameState.score >= 30) {
+
+        playerProgress.medium.completed = true;
+        playerProgress.hard.unlocked = true;
+
+    }
+
+    if (currentLevel === "hard" && gameState.score >= 30) {
+
+        playerProgress.hard.completed = true;
+
+    }
+
+    // Guardar progreso
+    localStorage.setItem(
+        "progress",
+        JSON.stringify(playerProgress)
+    );
+
+    // Mensaje final
+    let winMessage =
+    gameState.lives > 0
+    ? "🎉 ¡Nivel Superado!"
+    : "💀 Fin del Juego";
+
+    // Render final
+    document.getElementById("app").innerHTML = `
+
+    <div class="min-h-screen flex flex-col items-center justify-center text-center p-6">
+
+        <h1 class="pixel glow text-3xl mb-6">
+            ${winMessage}
+        </h1>
+
+        <div class="text-4xl font-bold mb-4">
+            ⭐ ${gameState.score} puntos
+        </div>
+
+        <p class="text-lg mb-8 text-white/70 max-w-sm">
+
+            ${
+                gameState.lives > 0
+                ? 'Tu progreso fue guardado exitosamente.'
+                : 'Te quedaste sin vidas.'
             }
 
-            // Validar victoria para desbloqueos
-            let winMessage = "Juego Terminado";
-            if (gameState.lives > 0) {
-                playerProgress[currentLevel].completed = true;
-                winMessage = "🎉 ¡NIVEL COMPLETADO! 🎉";
-                
-                if (currentLevel === 'easy') {
-                    playerProgress.medium.unlocked = true;
-                } else if (currentLevel === 'medium') {
-                    playerProgress.hard.unlocked = true;
-                }
-            }
+        </p>
 
-            document.getElementById("app").innerHTML = `
-            <div class="min-h-screen flex flex-col items-center justify-center text-center p-6">
-                <h1 class="pixel glow text-3xl mb-6">${winMessage}</h1>
-                <div class="text-4xl font-bold mb-4">⭐ ${gameState.score} puntos</div>
-                <p class="text-lg mb-8 text-white/70 max-w-sm">
-                    ${gameState.lives > 0 ? '¡Pasaste el filtro! Tu progreso ha sido guardado exitosamente en el sistema.' : 'Te quedaste sin respuestas. ¡Estudia un poco más y vuelve a intentar!'}
-                </p>
-                <div class="flex gap-4">
-                    <button onclick="startGame(currentGame)" class="btn bg-green-600 hover:bg-green-500 px-6 py-3 rounded-2xl font-bold cursor-pointer text-white">
-                        🔄 Reintentar
-                    </button>
-                    <button onclick="renderLevels()" class="btn bg-indigo-700 hover:bg-indigo-600 px-6 py-3 rounded-2xl font-bold cursor-pointer text-white">
-                        🗺️ Ver Niveles
-                    </button>
-                </div>
-            </div>
-            `;
-        }
+        <div class="flex gap-4">
+
+            <button
+                onclick="startGame(currentGame)"
+                class="btn bg-green-600 px-6 py-3 rounded-2xl font-bold"
+            >
+                🔄 Reintentar
+            </button>
+
+            <button
+                onclick="renderLevels()"
+                class="btn bg-indigo-700 px-6 py-3 rounded-2xl font-bold"
+            >
+                🗺️ Ver niveles
+            </button>
+
+        </div>
+
+    </div>
+
+    `;
+}
         
         /* =========================================================
+        
    ARRANQUE DE LA APLICACIÓN
 ========================================================= */
-        renderHome();
+function showSplash(){
+
+document.getElementById("app").innerHTML = `
+
+<div class="min-h-screen flex flex-col items-center justify-center text-center">
+
+<h1 class="pixel glow text-5xl mb-6">
+AlfaLearn
+</h1>
+
+<p class="text-xl text-white/70">
+Cargando experiencia...
+</p>
+
+</div>
+
+`;
+
+setTimeout(()=>{
+
+renderHome();
+
+},2000);
+
+}
+function resetProgress(){
+
+localStorage.clear();
+
+playerProgress = {
+
+    easy:{
+        unlocked:true,
+        completed:false,
+        highscore:0
+    },
+
+    medium:{
+        unlocked:false,
+        completed:false,
+        highscore:0
+    },
+
+    hard:{
+        unlocked:false,
+        completed:false,
+        highscore:0
+    }
+
+};
+
+renderHome();
+
+}
+        showSplash();
 
     </script>
 
