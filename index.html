@@ -863,59 +863,83 @@ class="mt-4 bg-red-600 px-4 py-2 rounded-xl"
    ARRANQUE DE LA APLICACIÓN
 ========================================================= */
 function showSplash(){
-
-document.getElementById("app").innerHTML = `
-
-<div class="min-h-screen flex flex-col items-center justify-center text-center">
-
-<h1 class="pixel glow text-5xl mb-6">
-AlfaLearn
-</h1>
-
-<p class="text-xl text-white/70">
-Cargando experiencia...
-</p>
-
-</div>
-
-`;
-
-setTimeout(()=>{
-
-renderHome();
-
-},2000);
-
-}
-function resetProgress(){
-
-localStorage.clear();
-
-playerProgress = {
-
-    easy:{
-        unlocked:true,
-        completed:false,
-        highscore:0
-    },
-
-    medium:{
-        unlocked:false,
-        completed:false,
-        highscore:0
-    },
-
-    hard:{
-        unlocked:false,
-        completed:false,
-        highscore:0
+    // Intentar leer si ya existe un nombre guardado en el navegador
+    const savedName = localStorage.getItem("playerName");
+    if (savedName) {
+        player.name = savedName;
     }
 
-};
+    // Si el jugador aún se llama "Jugador" por defecto, le pedimos su nombre
+    if (player.name === "Jugador") {
+        document.getElementById("app").innerHTML = `
+        <div class="min-h-screen flex flex-col items-center justify-center text-center p-6">
+            <h1 class="pixel glow text-4xl md:text-5xl mb-4">AlfaLearn</h1>
+            <p class="text-xl text-white/70 mb-8">¡Bienvenido al espacio del conocimiento!</p>
+            
+            <div class="card p-6 w-full max-w-sm flex flex-col gap-4">
+                <label class="text-lg font-bold text-cyan-300 uppercase tracking-wide">Introduce tu Nombre:</label>
+                <input 
+                    type="text" 
+                    id="name-input" 
+                    placeholder="Ej. Carlos_CONALEP" 
+                    class="bg-black/40 border border-white/20 p-3 rounded-xl text-center text-white font-medium text-lg focus:outline-none focus:border-cyan-400 transition-colors"
+                >
+                <button 
+                    onclick="savePlayerName()" 
+                    class="btn bg-gradient-to-r from-yellow-400 to-amber-500 text-white font-bold p-3 rounded-xl shadow-lg cursor-pointer text-lg"
+                >
+                    🚀 INGRESAR
+                </button>
+            </div>
+        </div>
+        `;
+    } else {
+        // Si ya tiene un nombre guardado, solo muestra la carga limpia de 1.5 segundos
+        document.getElementById("app").innerHTML = `
+        <div class="min-h-screen flex flex-col items-center justify-center text-center">
+            <h1 class="pixel glow text-5xl mb-6">AlfaLearn</h1>
+            <p class="text-xl text-white/70">Cargando tu experiencia, ${player.name}...</p>
+        </div>
+        `;
+        setTimeout(() => {
+            renderHome();
+        }, 1500);
+    }
+}
+function savePlayerName() {
+    const input = document.getElementById("name-input");
+    let typedName = input.value.trim();
+
+    // Si el usuario no escribió nada, le asignamos uno genial por defecto
+    if (typedName === "") {
+        typedName = "Cadete Espacial";
+    }
+
+    // Actualizamos el objeto global, guardamos en disco y renderizamos la Home
+    player.name = typedName;
+    localStorage.setItem("playerName", typedName);
+    renderHome();
+}
+function resetProgress(){
+    localStorage.clear();
+    
+    // Reseteamos el nombre a la configuración base
+    player.name = "Jugador";
+    player.xp = 0;
+    player.level = 1;
+
+    playerProgress = {
+        easy:{ unlocked:true, completed:false, highscore:0 },
+        medium:{ unlocked:false, completed:false, highscore:0 },
+        hard:{ unlocked:false, completed:false, highscore:0 }
+    };
+
+    // Al reiniciar por completo, lo mandamos al flujo del Splash para pedir el nombre otra vez
+    showSplash();
+}
 
 renderHome();
 
-}
         showSplash();
 
     </script>
